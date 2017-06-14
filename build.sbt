@@ -8,8 +8,6 @@ name := "hyperbus-raml-utils"
 
 version := "0.1-SNAPSHOT"
 
-sbtPlugin := true
-
 libraryDependencies ++= Seq(
   "com.hypertino" %% "scalamock-scalatest-support" % "3.4-SNAPSHOT" % "test"  
 )
