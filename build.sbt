@@ -4,7 +4,7 @@ crossScalaVersions := Seq("2.12.1", "2.11.8", "2.10.6")
 
 organization := "com.hypertino"
 
-name := "hyperbus-raml-utils"
+name := "hyperbus-utils"
 
 version := "0.1-SNAPSHOT"
 

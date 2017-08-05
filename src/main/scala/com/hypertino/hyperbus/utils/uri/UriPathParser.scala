@@ -1,4 +1,4 @@
-package com.hypertino.hyperbus.raml.utils
+package com.hypertino.hyperbus.utils.uri
 
 import scala.collection.mutable
 
@@ -16,9 +16,9 @@ case object RegularMatchType extends MatchType
 
 case object PathMatchType extends MatchType
 
-case class UriParserException(message: String, cause: Throwable = null) extends RuntimeException(message, cause)
+case class UriPathParserException(message: String, cause: Throwable = null) extends RuntimeException(message, cause)
 
-object UriParser {
+object UriPathParser {
   def extractParameters(uriPattern: String): Seq[String] = tokens(uriPattern) collect {
     case ParameterToken(str, _) ⇒ str
   }
@@ -86,6 +86,6 @@ object UriParser {
   def matchType(s: String): MatchType = s match {
     case "*" ⇒ PathMatchType
     case "@" ⇒ RegularMatchType
-    case _ ⇒ throw new UriParserException(s"Unexpected match type: $s")
+    case _ ⇒ throw new UriPathParserException(s"Unexpected match type: $s")
   }
 }
