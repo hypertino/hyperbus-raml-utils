@@ -1,91 +1,73 @@
 package com.hypertino.hyperbus.utils.uri
 
-import scala.collection.mutable
-
 sealed trait Token
 
 case object SlashToken extends Token
 
 case class TextToken(value: String) extends Token
 
-case class ParameterToken(value: String, matchType: MatchType = RegularMatchType) extends Token
-
-sealed trait MatchType
-
-case object RegularMatchType extends MatchType
-
-case object PathMatchType extends MatchType
+case class ParameterToken(value: String) extends Token
 
 case class UriPathParserException(message: String, cause: Throwable = null) extends RuntimeException(message, cause)
 
 object UriPathParser {
-  def extractParameters(uriPattern: String): Seq[String] = tokens(uriPattern) collect {
-    case ParameterToken(str, _) ⇒ str
+  def extractParameters(pattern: String): Iterator[String] = tokens(pattern) collect {
+    case ParameterToken(str) ⇒ str
   }
 
-  // todo: make this lazy (iterator of Token?)
-  def tokens(uriPattern: String): Seq[Token] = {
-    val DEFAULT = 0
-    val PARAMETER = 1
-    val PARAMETER_MATCH_TYPE = 2
-    var state = DEFAULT
-    val result = new mutable.MutableList[Token]
-    val buf = new mutable.StringBuilder
-    var parameterName: String = null
+  def tokens(pattern: String): Iterator[Token] = new TokenIterator(pattern.iterator)
+}
 
-    uriPattern.foreach { c ⇒
-      state match {
-        case DEFAULT ⇒
-          c match {
-            case '{' ⇒
-              if (buf.nonEmpty) {
-                result += TextToken(buf.toString())
-                buf.clear()
-              }
-              state = PARAMETER
-            case '/' ⇒
-              if (buf.nonEmpty) {
-                result += TextToken(buf.toString())
-                buf.clear()
-              }
-              result += SlashToken
-            case _ ⇒
-              buf += c
-          }
-        case PARAMETER ⇒
-          c match {
-            case '}' ⇒
-              result += ParameterToken(buf.toString())
-              buf.clear()
-              state = DEFAULT
-            case ':' ⇒
-              parameterName = buf.toString()
-              buf.clear()
-              state = PARAMETER_MATCH_TYPE
-            case _ ⇒
-              buf += c
-          }
-        case PARAMETER_MATCH_TYPE ⇒
-          c match {
-            case '}' ⇒
-              result += ParameterToken(parameterName, matchType(buf.toString()))
-              buf.clear()
-              state = DEFAULT
-            case _ ⇒
-              buf += c
-          }
+private [uri] class TokenIterator(sourceIterator: Iterator[Char]) extends Iterator[Token] {
+  private val sb = new StringBuilder
+  var unprocessed: Option[Char] = None
+
+  override def hasNext: Boolean = unprocessed.isDefined || sourceIterator.hasNext
+
+  override def next(): Token = {
+    nextChar() match {
+      case '/' ⇒ SlashToken
+      case '{' ⇒ nextParameterToken()
+      case c ⇒ nextTextToken(c)
+    }
+  }
+
+  private def nextChar(): Char = unprocessed.map { c ⇒
+    unprocessed = None
+    c
+  } getOrElse {
+    sourceIterator.next()
+  }
+
+  private def nextParameterToken(): ParameterToken = {
+    sb.clear()
+    var continue = true
+    while (hasNext && continue) {
+      nextChar() match {
+        case '}' ⇒
+          continue = false
+
+        case ci ⇒
+          sb.append(ci)
       }
     }
-    if (buf.nonEmpty) {
-      result += TextToken(buf.toString())
-    }
-
-    result.toSeq
+    ParameterToken(sb.toString())
   }
 
-  def matchType(s: String): MatchType = s match {
-    case "*" ⇒ PathMatchType
-    case "@" ⇒ RegularMatchType
-    case _ ⇒ throw new UriPathParserException(s"Unexpected match type: $s")
+  private def nextTextToken(c: Char): TextToken = {
+    sb.clear()
+    sb.append(c)
+    var continue = true
+    while (hasNext && continue) {
+      nextChar() match {
+        case ci @ ('/' | '{') ⇒
+          unprocessed = Some(ci)
+          continue = false
+
+        case ci ⇒
+          sb.append(ci)
+      }
+    }
+    TextToken(sb.toString)
   }
 }
