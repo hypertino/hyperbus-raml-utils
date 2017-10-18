@@ -1,6 +1,6 @@
-scalaVersion := "2.10.6"
+crossScalaVersions := Seq("2.12.3", "2.11.11", "2.10.6")
 
-crossScalaVersions := Seq("2.12.1", "2.11.8", "2.10.6")
+scalaVersion := crossScalaVersions.value.head
 
 organization := "com.hypertino"
 
@@ -9,7 +9,7 @@ name := "hyperbus-utils"
 version := "0.1-SNAPSHOT"
 
 libraryDependencies ++= Seq(
-  "com.hypertino" %% "scalamock-scalatest-support" % "3.4-SNAPSHOT" % "test"  
+  "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % "test"
 )
 
 resolvers ++= Seq(
