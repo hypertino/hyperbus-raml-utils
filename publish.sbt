@@ -37,12 +37,6 @@ pomExtra :=
       </developer>
     </developers>
 
-// Sonatype credentials
-credentials ++= (for {
-  username <- Option(System.getenv().get("sonatype_username"))
-  password <- Option(System.getenv().get("sonatype_password"))
-} yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", username, password)).toSeq
-
 // pgp keys and credentials
 pgpSecretRing := file("./travis/script/ht-oss-private.asc")
 pgpPublicRing := file("./travis/script/ht-oss-public.asc")
