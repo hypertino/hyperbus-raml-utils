@@ -6,7 +6,7 @@ organization := "com.hypertino"
 
 name := "hyperbus-utils"
 
-version := "0.1-SNAPSHOT"
+version := "0.1.0"
 
 libraryDependencies ++= Seq(
   "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % "test"
