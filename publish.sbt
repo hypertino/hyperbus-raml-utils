@@ -11,6 +11,10 @@ publishTo := {
 publishArtifact in Test := false
 pomIncludeRepository := { _ => false}
 
+// FIXME: remove setting of overwrite flag when the following issue will be fixed: https://github.com/sbt/sbt/issues/3725
+publishConfiguration := publishConfiguration.value.withOverwrite(isSnapshot.value)
+publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(isSnapshot.value)
+
 pomExtra :=
   <url>https://github.com/hypertino/hyperbus-utils</url>
     <licenses>
